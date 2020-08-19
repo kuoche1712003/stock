@@ -25,16 +25,14 @@ public class StockServiceImpl implements StockService {
     @Override
     public List<StockDto> getStock(String stockNumber, StockType stockType) {
         LocalDate now = LocalDate.now();
-        LocalDate twentyDaysAgo = now.plusMonths(-1L);
-        LocalDate fortyDaysAgo = now.plusMonths(-2L);
-
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         Set<DailyTransaction> set = new HashSet<>();
 
         if(stockType == StockType.LISTED){
-            set.addAll(fetchStockService.fetchDailyTransaction(stockNumber, now.format(dateTimeFormatter)));
-            set.addAll(fetchStockService.fetchDailyTransaction(stockNumber, twentyDaysAgo.format(dateTimeFormatter)));
-            set.addAll(fetchStockService.fetchDailyTransaction(stockNumber, fortyDaysAgo.format(dateTimeFormatter)));
+            fetchListed(now, set, stockNumber);
+        }
+
+        if(stockType == StockType.OPC){
+            fetchOpc(now, set, stockNumber);
         }
 
         List<DailyTransaction> result = new ArrayList<>(set).stream()
@@ -76,5 +74,30 @@ public class StockServiceImpl implements StockService {
         return result.stream().skip(21)
                 .map(item->modelMapper.map(item, StockDto.class))
                 .collect(Collectors.toList());
+    }
+
+    private void fetchListed(LocalDate now, Set<DailyTransaction> set, String stockNumber){
+        LocalDate twentyDaysAgo = now.plusMonths(-1L);
+        LocalDate fortyDaysAgo = now.plusMonths(-2L);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+        set.addAll(fetchStockService.fetchListedStock(stockNumber, now.format(dateTimeFormatter)));
+        set.addAll(fetchStockService.fetchListedStock(stockNumber, twentyDaysAgo.format(dateTimeFormatter)));
+        set.addAll(fetchStockService.fetchListedStock(stockNumber, fortyDaysAgo.format(dateTimeFormatter)));
+    }
+
+    private void fetchOpc(LocalDate now, Set<DailyTransaction> set, String stockNumber){
+        LocalDate twentyDaysAgo = now.plusMonths(-1L);
+        LocalDate fortyDaysAgo = now.plusMonths(-2L);
+
+        set.addAll(fetchStockService.fetchOpcStock(stockNumber, getDate(now)));
+        set.addAll(fetchStockService.fetchOpcStock(stockNumber, getDate(twentyDaysAgo)));
+        set.addAll(fetchStockService.fetchOpcStock(stockNumber, getDate(fortyDaysAgo)));
+    }
+
+    private String getDate(LocalDate date){
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("/MM");
+        int year = date.getYear() - 1911;
+        return year + date.format(dateTimeFormatter);
     }
 }

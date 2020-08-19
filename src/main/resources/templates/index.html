@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <form>
+        <form id="stock-form">
             <div class="row justify-content-center my-1">
                 <div class="col-sm-12 col-md-6">
                     <label for="stock-number">股票代碼</label>
@@ -26,7 +26,7 @@
             </div>
             <div class="row justify-content-center my-2">
                 <div class="col-sm-12 col-md-6">
-                    <button id="search-stock" type="button" class="form-control btn btn-primary">查詢</button>
+                    <button id="search-stock" type="submit" class="form-control btn btn-primary">查詢</button>
                 </div>
             </div>
         </form>
@@ -51,7 +51,8 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
     <script>
         $(function(){
-            $('#search-stock').on('click', function () {
+            $('#stock-form').on('submit', function (e) {
+                e.preventDefault();
                 var stockNumber = $('#stock-number').val();
                 var stockType = $('#stock-type').val();
                 $.getJSON('Stock?stockNumber=' + stockNumber + '&stockType=' + stockType, function (data) {
