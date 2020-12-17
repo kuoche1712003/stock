@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Denny</title>
+    <style>
+        *{margin:0; padding:0;}
+        body{ background-color: #1E1E1E; }
+    </style>
+</head>
+<body>
+<canvas id="drawHeart"></canvas>
+
+<script>
+    var hearts = [];
+    var text = null;
+    var canvas = document.getElementById('drawHeart');
+    var wW = window.innerWidth;
+    var wH = window.innerHeight;
+    // 創建畫布
+    var ctx = canvas.getContext('2d');
+    // 創建圖片
+    var heartImage = new Image();
+    heartImage.src = '/heart.svg';
+    var num = 100;
+
+    init();
+
+    window.addEventListener('resize', function(){
+        wW = window.innerWidth;
+        wH = window.innerHeight;
+    });
+    // 初始畫畫布大小
+    function init(){
+        canvas.width = wW;
+        canvas.height = wH;
+        for(var i = 0; i < num; i++){
+            hearts.push(new Heart());
+        }
+        text = new Text();
+        requestAnimationFrame(render);
+        var timeoutID = window.setInterval(function(){
+            text.next();
+        }, 3000);
+    }
+
+    function Text(){
+        this.x = wW / 2;
+        this.y = wH / 2;
+        this.index = 0;
+        this.color = 'white';
+        this.align = 'center';
+        this.size = wW / 15 + "px Arial";
+        this.text = [
+            "原本想送你兩張電影票",
+            "讓你和童童",
+            "有個不一樣的聖誕節",
+            "但蝦皮賣家一直不出貨",
+            "只好委屈你了",
+            "送你這個無線滑鼠",
+            "希望你工作順利",
+            "童童就只好你自己努力"
+        ]
+    }
+
+    Text.prototype.draw = function() {
+        ctx.fillStyle = this.color;
+        ctx.textAlign = this.align;
+        ctx.font = this.size;
+        ctx.fillText(this.text[this.index], this.x, this.y);
+    }
+
+    Text.prototype.next = function() {
+        var size = this.text.length;
+        var index = (this.index + 1) % size;
+        this.index = index;
+    }
+
+    function Heart(){
+        // 初始化生成範圍
+        this.x = Math.random() * wW;
+        this.y = Math.random() * wH;
+
+        this.opacity = Math.random() * .5 + .5;
+
+        // 偏移量
+        this.vel = {
+            x: (Math.random() - .5) * 5,
+            y: (Math.random() - .5) * 5
+        }
+
+        this.initialW = wW * .5;
+        this.initialH = wH * .5;
+        // 縮放比例
+        this.targetScale = Math.random() * .15 + .02; // 最小0.02
+        this.scale = Math.random() * this.targetScale;
+    }
+
+    Heart.prototype.draw = function(){
+        ctx.save();
+        ctx.globalAlpha = this.opacity;
+        ctx.drawImage(heartImage, this.x, this.y, this.width, this.height);
+        ctx.restore();
+    }
+    Heart.prototype.update = function(){
+        this.x += this.vel.x;
+        this.y += this.vel.y;
+
+        if(this.x - this.width > wW || this.x + this.width < 0){
+            // 重新初始化位置
+            this.scale = 0;
+            this.x = Math.random() * wW;
+            this.y = Math.random() * wH;
+        }
+        if(this.y - this.height > wH || this.y + this.height < 0){
+            // 重新初始化位置
+            this.scale = 0;
+            this.x = Math.random() * wW;
+            this.y = Math.random() * wH;
+        }
+
+        // 放大
+        this.scale += (this.targetScale - this.scale) * .1;
+        this.height = this.scale * this.initialH;
+        this.width = this.height * 1.4;
+
+    }
+
+    function render(){
+        ctx.clearRect(0, 0, wW, wH);
+        for(var i = 0; i < hearts.length; i++){
+            hearts[i].draw();
+            hearts[i].update();
+        }
+        text.draw();
+
+        requestAnimationFrame(render);
+    }
+</script>
+</body>
+</html>
