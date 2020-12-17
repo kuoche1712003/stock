@@ -13,6 +13,7 @@
 <canvas id="drawHeart"></canvas>
 
 <script>
+    var flag = false;
     var hearts = [];
     var text = null;
     var canvas = document.getElementById('drawHeart');
@@ -23,7 +24,7 @@
     // 創建圖片
     var heartImage = new Image();
     heartImage.src = '/heart.svg';
-    var num = 100;
+    var num = 50;
 
     init();
 
@@ -42,6 +43,10 @@
         requestAnimationFrame(render);
         var timeoutID = window.setInterval(function(){
             text.next();
+            console.log(text.index)
+            if(text.index === 1)
+                flag = true;
+
         }, 3000);
     }
 
@@ -129,9 +134,11 @@
 
     function render(){
         ctx.clearRect(0, 0, wW, wH);
-        for(var i = 0; i < hearts.length; i++){
-            hearts[i].draw();
-            hearts[i].update();
+        if(flag){
+            for(var i = 0; i < hearts.length; i++){
+                hearts[i].draw();
+                hearts[i].update();
+            }
         }
         text.draw();
 
